@@ -40,17 +40,44 @@ uv pip install all2ics
 打开你的终端，运行以下命令：
 
 ```bash
-all2ics convert <你的JSON文件路径> [输出的ICS文件路径]
+all2ics convert <你的JSON文件路径> [输出的ICS文件路径] [选项]
 ```
 
-**示例:**
+**基础示例:**
 ```bash
-# 将 my_courses.json 转换为默认的 schedule.ics
+# 将 my_courses.json 转换为默认的 schedule.ics（使用上海时间）
 all2ics convert my_courses.json
 
 # 将 my_courses.json 转换为指定路径的 my_calendar.ics
-all2ics convert ./data/my_courses.json ./output/my_calendar.ics
+all2ics convert my_courses.json my_calendar.ics
 ```
+
+**时区和高级选项:**
+```bash
+# 指定默认时区为北京时间（与上海时间相同）
+all2ics convert my_courses.json --timezone Asia/Shanghai
+
+# 使用UTC时区
+all2ics convert my_courses.json --timezone UTC
+
+# 使用纽约时间
+all2ics convert my_courses.json --timezone America/New_York
+
+# 显示详细处理信息
+all2ics convert my_courses.json --verbose
+
+# 组合使用选项
+all2ics convert my_courses.json my_calendar.ics --timezone Asia/Shanghai --verbose
+
+# 查看常用时区列表
+all2ics timezones
+```
+
+**🌍 时区说明:**
+- **默认时区**: Asia/Shanghai (上海时间，北京时间)
+- 支持在JSON文件中为每个课程单独设置时区
+- 支持全球所有标准时区格式
+- 常用时区示例：`Asia/Shanghai`, `UTC`, `America/New_York`, `Europe/London`
 转换成功后，你就可以将生成的 `.ics` 文件导入到任何支持 iCalendar 格式的日历应用中了！
 
 ## 🗺️ 未来路线图 (Roadmap)

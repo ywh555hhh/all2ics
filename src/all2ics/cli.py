@@ -5,13 +5,29 @@ import json
 from pathlib import Path
 from pydantic import ValidationError
 from typing_extensions import Annotated
+import pytz
 
 # 导入核心模块
 from .schema import CourseSchedule, CourseEvent
 from .converter import create_ics_from_schedule
 
+# 常用时区列表，用于帮助用户选择
+COMMON_TIMEZONES = {
+    "Asia/Shanghai": "上海时间/北京时间 (UTC+8)",
+    "Asia/Beijing": "北京时间 (UTC+8)",
+    "UTC": "世界标准时间 (UTC+0)",
+    "America/New_York": "纽约时间 (UTC-5/-4)",
+    "Europe/London": "伦敦时间 (UTC+0/+1)",
+    "Asia/Tokyo": "东京时间 (UTC+9)",
+    "America/Los_Angeles": "洛杉矶时间 (UTC-8/-7)",
+    "Europe/Paris": "巴黎时间 (UTC+1/+2)",
+}
+
 # 创建一个 Typer 应用实例
-app = typer.Typer(help="all2ics: 一个智能的课程表转换工具，将 AI 生成的 JSON 转换为 .ics 文件。")
+app = typer.Typer(
+    help="all2ics: 一个智能的课程表转换工具，将 AI 生成的 JSON 转换为 .ics 文件。",
+    epilog="💡 提示: 使用 --verbose 选项可以查看详细的处理过程。更多信息请访问: https://github.com/ywh555hhh/all2ics"
+)
 
 @app.command(help="转换 JSON 文件为 ICS 文件")
 def convert(
@@ -45,12 +61,14 @@ def convert(
     
     try:
         # 验证时区是否有效
-        import pytz
         try:
             pytz.timezone(timezone)
         except pytz.exceptions.UnknownTimeZoneError:
-            typer.secho(f"❌ 错误: 无效的时区 '{timezone}'。请使用有效的时区名称，如 'Asia/Shanghai'。", fg=typer.colors.RED)
-            typer.echo("💡 常用时区: Asia/Shanghai (上海), Asia/Beijing (北京), UTC (世界标准时间)")
+            typer.secho(f"❌ 错误: 无效的时区 '{timezone}'。请使用有效的时区名称。", fg=typer.colors.RED)
+            typer.echo("💡 常用时区参考:")
+            for tz_name, tz_desc in COMMON_TIMEZONES.items():
+                typer.echo(f"   {tz_name:<20} - {tz_desc}")
+            typer.echo("\n🔍 查看完整时区列表: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones")
             raise typer.Exit(1)
             
         # 1. 读取和解码 JSON 文件
@@ -97,6 +115,30 @@ def convert(
             import traceback
             typer.echo("详细错误堆栈:")
             typer.echo(traceback.format_exc())
+
+
+@app.command(help="显示常用时区列表")
+def timezones():
+    """
+    显示常用时区及其描述，帮助用户选择合适的时区设置。
+    """
+    typer.echo("🌍 常用时区列表:")
+    typer.echo("=" * 60)
+    
+    for tz_name, tz_desc in COMMON_TIMEZONES.items():
+        # 获取当前时区的当前时间作为示例
+        try:
+            tz = pytz.timezone(tz_name)
+            from datetime import datetime
+            current_time = datetime.now(tz).strftime("%H:%M")
+            typer.echo(f"  {tz_name:<20} - {tz_desc} (当前: {current_time})")
+        except:
+            typer.echo(f"  {tz_name:<20} - {tz_desc}")
+    
+    typer.echo("\n" + "=" * 60)
+    typer.echo("💡 使用方法:")
+    typer.echo("   all2ics input.json output.ics --timezone Asia/Shanghai")
+    typer.echo("\n🔍 查看完整时区列表: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones")
 
 if __name__ == "__main__":
     app()
