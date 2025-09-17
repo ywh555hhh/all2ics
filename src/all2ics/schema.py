@@ -23,6 +23,7 @@ class CourseEvent(BaseModel):
     begin: str = Field(..., description="首次上课的开始日期和时间 (格式: 'YYYY-MM-DD HH:MM:SS')")
     end: str = Field(..., description="首次上课的结束日期和时间 (格式: 'YYYY-MM-DD HH:MM:SS')")
     rrule: Optional[RRule] = Field(None, description="课程的重复规则")
+    timezone: Optional[str] = Field("Asia/Shanghai", description="时区设置，默认为上海时间 (Asia/Shanghai)")
 
 # 定义最终输入的 JSON 结构为一个 CourseEvent 对象的列表
 CourseSchedule = List[CourseEvent]
