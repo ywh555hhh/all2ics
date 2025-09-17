@@ -1,0 +1,65 @@
+[
+  {
+    "name": "每周课程（基础）",
+    "location": "教室A",
+    "description": "标准的每周重复课程",
+    "begin": "2025-01-06 09:00:00",
+    "end": "2025-01-06 10:30:00",
+    "rrule": {
+      "freq": "WEEKLY",
+      "until": "2025-06-15"
+    }
+  },
+  {
+    "name": "双周课程（使用interval）",
+    "location": "教室B",
+    "description": "每隔一周重复的课程",
+    "begin": "2025-01-06 14:00:00",
+    "end": "2025-01-06 16:00:00",
+    "rrule": {
+      "freq": "WEEKLY",
+      "interval": 2,
+      "count": 10
+    }
+  },
+  {
+    "name": "工作日课程（使用byday）",
+    "location": "教室C",
+    "description": "周一到周五的课程",
+    "begin": "2025-01-06 08:00:00",
+    "end": "2025-01-06 09:00:00",
+    "rrule": {
+      "freq": "WEEKLY",
+      "byday": "MO,TU,WE,TH,FR",
+      "until": "2025-03-31"
+    }
+  },
+  {
+    "name": "月度会议（复杂规则）",
+    "location": "会议室",
+    "description": "每月第一个周一",
+    "begin": "2025-01-06 10:00:00",
+    "end": "2025-01-06 12:00:00",
+    "rrule": {
+      "freq": "MONTHLY",
+      "byday": "MO",
+      "bysetpos": "1",
+      "count": 12
+    }
+  },
+  {
+    "name": "季度报告（多字段组合）",
+    "location": "大会议室",
+    "description": "每季度第一个工作日",
+    "begin": "2025-01-01 09:00:00",
+    "end": "2025-01-01 17:00:00",
+    "rrule": {
+      "freq": "MONTHLY",
+      "interval": 3,
+      "bymonth": "1,4,7,10",
+      "byday": "MO,TU,WE,TH,FR",
+      "bysetpos": "1",
+      "wkst": "MO"
+    }
+  }
+]

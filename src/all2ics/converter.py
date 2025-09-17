@@ -63,6 +63,12 @@ def create_ics_from_schedule(schedule: CourseSchedule, default_timezone: str = "
         if course.rrule:
             # 将 Pydantic 模型转换为 ics.py 能理解的 rrule 字符串
             rrule_parts = [f"FREQ={course.rrule.freq}"]
+            
+            # 添加 INTERVAL 支持
+            if course.rrule.interval and course.rrule.interval > 1:
+                rrule_parts.append(f"INTERVAL={course.rrule.interval}")
+            
+            # 处理 UNTIL 日期
             if course.rrule.until:
                 # 处理 UNTIL 日期，需要转换为正确的时区
                 until_dt = datetime.strptime(course.rrule.until, '%Y-%m-%d')
@@ -74,8 +80,26 @@ def create_ics_from_schedule(schedule: CourseSchedule, default_timezone: str = "
                 until_utc = until_dt_tz.astimezone(pytz.UTC)
                 until_date = until_utc.strftime('%Y%m%dT%H%M%SZ')
                 rrule_parts.append(f"UNTIL={until_date}")
+            
+            # 添加 COUNT 支持
             if course.rrule.count:
                 rrule_parts.append(f"COUNT={course.rrule.count}")
+            
+            # 添加 BYDAY 支持
+            if course.rrule.byday:
+                rrule_parts.append(f"BYDAY={course.rrule.byday}")
+            
+            # 添加 BYMONTH 支持
+            if course.rrule.bymonth:
+                rrule_parts.append(f"BYMONTH={course.rrule.bymonth}")
+            
+            # 添加 BYSETPOS 支持
+            if course.rrule.bysetpos:
+                rrule_parts.append(f"BYSETPOS={course.rrule.bysetpos}")
+            
+            # 添加 WKST 支持
+            if course.rrule.wkst:
+                rrule_parts.append(f"WKST={course.rrule.wkst}")
             
             # 使用 ContentLine 创建 RRULE
             rrule_line = ContentLine('RRULE', value=";".join(rrule_parts))
