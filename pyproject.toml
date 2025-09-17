@@ -1,0 +1,20 @@
+[project]
+name = "all2ics"
+version = "0.1.0"
+description = "一个智能、可扩展的工具，用于将AI生成的课程表JSON转换为ICS日历文件。"
+authors = [{name = "Copilot Agent", email = "agent@example.com"}]
+license = {text = "MIT"}
+requires-python = ">=3.9"
+readme = "README.md"
+dependencies = [
+    "ics==0.7.2",
+    "pydantic>=2.0",
+    "typer[all]"
+]
+
+[project.scripts]
+# 这个命令让用户可以通过在终端输入 `all2ics` 来调用程序
+all2ics = "all2ics.cli:app"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
