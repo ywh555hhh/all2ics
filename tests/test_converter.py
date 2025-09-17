@@ -62,3 +62,117 @@ def test_create_ics_from_schedule_with_timezone():
     # 验证时区转换：上海时间10:00应该转换为UTC的02:00
     assert "020000Z" in ics_content
     assert "033000Z" in ics_content  # 11:30上海时间应该是03:30 UTC
+
+
+def test_create_ics_with_interval():
+    """
+    测试 RRULE 中的 interval 支持（例如每隔一周重复）。
+    """
+    from all2ics.schema import RRule
+    
+    test_course = CourseEvent(
+        name="双周课程",
+        location="教室A",
+        description="每隔一周上课的课程",
+        begin="2025-01-15 10:00:00", 
+        end="2025-01-15 12:00:00",
+        rrule=RRule(
+            freq="WEEKLY",
+            interval=2,
+            until="2025-06-15"
+        )
+    )
+    
+    schedule = [test_course]
+    ics_content = create_ics_from_schedule(schedule)
+    
+    # 验证 INTERVAL=2 被正确添加到 RRULE 中
+    assert "RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=" in ics_content
+    assert "SUMMARY:双周课程" in ics_content
+
+
+def test_create_ics_with_comprehensive_rrule():
+    """
+    测试完整的 RRULE 功能，包括 byday, bymonth 等高级特性。
+    """
+    from all2ics.schema import RRule
+    
+    # 测试每月第一个周一的课程
+    monthly_course = CourseEvent(
+        name="月度会议",
+        location="会议室B",
+        description="每月第一个周一",
+        begin="2025-01-06 14:00:00",
+        end="2025-01-06 16:00:00", 
+        rrule=RRule(
+            freq="MONTHLY",
+            byday="MO",
+            bysetpos="1",
+            count=12
+        )
+    )
+    
+    # 测试工作日课程
+    weekday_course = CourseEvent(
+        name="工作日课程", 
+        location="教室C",
+        description="周一到周五",
+        begin="2025-01-06 09:00:00",
+        end="2025-01-06 10:00:00",
+        rrule=RRule(
+            freq="WEEKLY",
+            byday="MO,TU,WE,TH,FR",
+            until="2025-06-30"
+        )
+    )
+    
+    schedule = [monthly_course, weekday_course]
+    ics_content = create_ics_from_schedule(schedule)
+    
+    # 验证月度课程的 RRULE
+    assert "RRULE:FREQ=MONTHLY;COUNT=12;BYDAY=MO;BYSETPOS=1" in ics_content
+    assert "SUMMARY:月度会议" in ics_content
+    
+    # 验证工作日课程的 RRULE
+    assert "RRULE:FREQ=WEEKLY;UNTIL=" in ics_content
+    assert "BYDAY=MO,TU,WE,TH,FR" in ics_content
+    assert "SUMMARY:工作日课程" in ics_content
+
+
+def test_rrule_with_default_interval():
+    """
+    测试当 interval=1 或未设置时，不应在 RRULE 中包含 INTERVAL。
+    """
+    from all2ics.schema import RRule
+    
+    # interval=1 的情况
+    course_interval_1 = CourseEvent(
+        name="测试课程1",
+        location="教室1",
+        begin="2025-01-15 10:00:00",
+        end="2025-01-15 12:00:00", 
+        rrule=RRule(
+            freq="WEEKLY",
+            interval=1,
+            count=10
+        )
+    )
+    
+    # 没有设置 interval 的情况
+    course_no_interval = CourseEvent(
+        name="测试课程2",
+        location="教室2", 
+        begin="2025-01-15 14:00:00",
+        end="2025-01-15 16:00:00",
+        rrule=RRule(
+            freq="WEEKLY",
+            count=10
+        )
+    )
+    
+    schedule = [course_interval_1, course_no_interval]
+    ics_content = create_ics_from_schedule(schedule)
+    
+    # 验证 INTERVAL=1 不会出现在 RRULE 中（因为1是默认值）
+    assert "INTERVAL=1" not in ics_content
+    assert "RRULE:FREQ=WEEKLY;COUNT=10" in ics_content
